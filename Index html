@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="theme-color" content="#f6f7f2">
+	<title>Quizwizz — curiosity, on tap</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--ink: #202824;
+			--muted: #78817a;
+			--paper: #f6f7f2;
+			--white: #fff;
+			--line: #e7e9e2;
+			--green: #c9ef74;
+			--green-dark: #4a6521;
+			--coral: #ff765f;
+			--blue: #a9d8ed;
+			--lilac: #d3c4f4;
+			--yellow: #f5d875;
+			--shadow: 0 16px 38px rgba(32, 40, 36, .08);
+			font-family: 'DM Sans', sans-serif;
+			color: var(--ink);
+			background: var(--paper);
+			font-synthesis: none;
+		}
+		* { box-sizing: border-box; }
+		body { margin: 0; min-height: 100vh; background: var(--paper); }
+		button, input, textarea, select { font: inherit; }
+		button { color: inherit; }
+		.app { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; }
+		.sidebar { background: #fff; border-right: 1px solid var(--line); padding: 26px 17px 20px; display: flex; flex-direction: column; }
+		.brand { display: flex; align-items: center; gap: 10px; padding: 0 9px; margin-bottom: 38px; color: var(--ink); text-decoration: none; }
+		.brand-mark { width: 35px; height: 35px; display: grid; place-items: center; background: var(--green); border-radius: 11px; font: 700 20px 'Space Grotesk', sans-serif; transform: rotate(-5deg); }
+		.brand-name { font: 700 20px 'Space Grotesk', sans-serif; letter-spacing: 0; }
+		.side-label { margin: 0 10px 10px; color: #a0a69e; font-size: 10px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; }
+		.nav { display: grid; gap: 4px; }
+		.nav button { width: 100%; display: flex; align-items: center; gap: 12px; border: 0; border-radius: 8px; padding: 11px 12px; background: transparent; color: #69726c; text-align: left; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .18s, color .18s; }
+		.nav button:hover, .nav button.active { background: #f0f3e9; color: var(--ink); }
+		.nav-icon { width: 20px; text-align: center; font-size: 17px; line-height: 1; }
+		.nav-count { margin-left: auto; color: #9da49b; font-size: 11px; }
+		.sidebar-rule { height: 1px; background: var(--line); margin: 24px 8px 20px; }
+		.topics-nav { display: grid; gap: 3px; }
+		.topics-nav button { display: flex; align-items: center; gap: 10px; border: 0; padding: 8px 10px; border-radius: 7px; color: #69726c; background: transparent; text-align: left; font-size: 12px; cursor: pointer; }
+		.topics-nav button:hover { color: var(--ink); background: #f5f6f1; }
+		.topic-dot { width: 8px; height: 8px; border-radius: 3px; background: var(--dot); }
+		.sidebar-bottom { margin-top: auto; }
+		.assistant-promo { padding: 15px; border-radius: 10px; background: #f1f5e8; }
+		.assistant-promo .spark { font-size: 20px; }
+		.assistant-promo h3 { margin: 8px 0 4px; font: 600 14px 'Space Grotesk', sans-serif; }
+		.assistant-promo p { margin: 0 0 12px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+		.assistant-promo button { border: 0; background: transparent; padding: 0; color: var(--green-dark); font-size: 11px; font-weight: 700; cursor: pointer; }
+		.user-row { display: flex; align-items: center; gap: 10px; padding: 20px 6px 0; }
+		.avatar { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: #f5d875; font-weight: 700; font-size: 12px; }
+		.user-name { font-size: 12px; font-weight: 700; }
+		.user-caption { margin-top: 2px; color: var(--muted); font-size: 10px; }
+		main { min-width: 0; padding: 0 46px 60px; }
+		.topbar { height: 76px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); }
+		.breadcrumb { color: var(--muted); font-size: 12px; }
+		.breadcrumb strong { color: var(--ink); font-weight: 600; }
+		.top-actions { display: flex; align-items: center; gap: 10px; }
+		.icon-button { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: #fff; cursor: pointer; }
+		.icon-button:hover { border-color: #b7c0b5; }
+		.create-button { display: flex; align-items: center; gap: 8px; border: 0; padding: 10px 15px; border-radius: 7px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 700; cursor: pointer; }
+		.create-button:hover { background: #35423a; }
+		.page { max-width: 1160px; margin: 0 auto; }
+		.welcome { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 35px 0 24px; }
+		.eyebrow { color: #899187; font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; font-weight: 700; }
+		h1, h2, h3, p { margin-top: 0; }
+		h1 { margin: 8px 0 7px; font: 600 34px/1.15 'Space Grotesk', sans-serif; letter-spacing: 0; }
+		.welcome p { margin: 0; color: var(--muted); font-size: 13px; }
+		.streak { display: flex; align-items: center; gap: 9px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+		.streak-icon { font-size: 19px; }
+		.streak strong { display: block; font-size: 12px; }
+		.streak span:last-child { color: var(--muted); font-size: 10px; }
+		.search-wrap { position: relative; margin-bottom: 22px; }
+		.search-icon { position: absolute; top: 50%; left: 16px; color: #899187; transform: translateY(-50%); font-size: 17px; pointer-events: none; }
+		.search { width: 100%; height: 49px; padding: 0 105px 0 45px; border: 1px solid #e1e4dc; border-radius: 8px; outline: none; background: #fff; font-size: 13px; }
+		.search:focus { border-color: #a9bd8f; box-shadow: 0 0 0 3px rgba(201, 239, 116, .24); }
+		.search-hint { position: absolute; top: 50%; right: 14px; color: #9aa198; font-size: 10px; transform: translateY(-50%); }
+		.hero { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(240px, .88fr); min-height: 245px; overflow: hidden; border-radius: 10px; background: #d9edbd; }
+		.hero-copy { position: relative; z-index: 1; padding: 28px 30px; align-self: center; }
+		.hero-tag { display: inline-flex; gap: 6px; align-items: center; padding: 6px 9px; border-radius: 5px; background: rgba(255,255,255,.55); color: #4a6521; font-size: 9px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+		.hero h2 { max-width: 410px; margin: 13px 0 8px; font: 600 27px/1.16 'Space Grotesk', sans-serif; }
+		.hero p { margin-bottom: 16px; color: #556344; font-size: 12px; }
+		.hero-cta { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 6px; padding: 10px 14px; background: var(--ink); color: white; font-size: 11px; font-weight: 700; cursor: pointer; }
+		.hero-art { min-height: 245px; background: #8db067 url('https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=900&q=85') center 43%/cover; position: relative; }
+		.hero-art:after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #d9edbd 0%, rgba(217,237,189,.35) 22%, transparent 65%); }
+		.stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: 22px 0 30px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+		.stat { display: flex; align-items: center; gap: 11px; padding: 14px 18px; }
+		.stat + .stat { border-left: 1px solid var(--line); }
+		.stat-mark { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 8px; background: var(--stat-bg); font-size: 15px; }
+		.stat strong { display: block; font: 600 16px 'Space Grotesk', sans-serif; }
+		.stat span:last-child { color: var(--muted); font-size: 10px; }
+		.section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+		.section-heading h2 { margin: 0; font: 600 19px 'Space Grotesk', sans-serif; }
+		.section-heading p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+		.text-button { border: 0; background: transparent; color: #607738; font-size: 11px; font-weight: 700; cursor: pointer; }
+		.filters { display: flex; gap: 7px; overflow-x: auto; padding: 1px 0 14px; scrollbar-width: none; }
+		.filters::-webkit-scrollbar { display: none; }
+		.filter-chip { flex: 0 0 auto; border: 1px solid #e5e8e0; border-radius: 20px; padding: 7px 12px; background: #fff; color: #667068; font-size: 10px; cursor: pointer; }
+		.filter-chip.active { border-color: var(--ink); background: var(--ink); color: #fff; }
+		.quiz-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
+		.quiz-card { min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: #fff; transition: transform .18s, box-shadow .18s; }
+		.quiz-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+		.cover { height: 104px; position: relative; background: var(--cover) center/cover; }
+		.cover:after { content: ''; position: absolute; inset: 35% 0 0; background: linear-gradient(transparent, rgba(20,25,23,.34)); }
+		.cover-label { position: absolute; z-index: 1; left: 12px; bottom: 10px; color: white; font-size: 10px; font-weight: 700; text-shadow: 0 1px 6px #0008; }
+		.cover-bookmark { position: absolute; z-index: 1; top: 9px; right: 9px; width: 27px; height: 27px; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); cursor: pointer; }
+		.cover-bookmark.saved { color: #58742a; background: var(--green); }
+		.quiz-info { padding: 12px; }
+		.quiz-title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; }
+		.quiz-title { margin: 0; font: 600 13px/1.3 'Space Grotesk', sans-serif; }
+		.rating { flex: 0 0 auto; color: #a57c18; font-size: 10px; }
+		.quiz-meta { display: flex; gap: 9px; margin: 7px 0 10px; color: var(--muted); font-size: 10px; }
+		.quiz-bottom { display: flex; justify-content: space-between; align-items: center; }
+		.level { border-radius: 4px; padding: 4px 6px; background: #f2f4ee; color: #6f786e; font-size: 9px; }
+		.play-button { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 50%; background: var(--green); font-size: 12px; cursor: pointer; }
+		.empty-state { grid-column: 1/-1; padding: 40px 20px; border: 1px dashed #d5dbd1; border-radius: 8px; color: var(--muted); text-align: center; font-size: 13px; }
+		.lower-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 14px; margin-top: 32px; }
+		.lower-panel { padding: 17px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+		.panel-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 13px; }
+		.panel-heading h3 { margin: 0; font: 600 14px 'Space Grotesk', sans-serif; }
+		.history-list { display: grid; gap: 10px; }
+		.history-row { display: flex; align-items: center; gap: 10px; }
+		.history-icon { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 7px; background: var(--history-bg); font-size: 15px; }
+		.history-title { flex: 1; min-width: 0; font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+		.history-date { color: var(--muted); font-size: 9px; }
+		.history-score { font: 600 11px 'Space Grotesk', sans-serif; }
+		.history-empty { padding: 16px 0; color: var(--muted); font-size: 11px; }
+		.creator-panel { display: flex; flex-direction: column; justify-content: space-between; min-height: 170px; background: #f4eddd; }
+		.creator-panel h3 { max-width: 210px; margin: 0 0 6px; font: 600 17px/1.2 'Space Grotesk', sans-serif; }
+		.creator-panel p { margin: 0; color: #777262; font-size: 11px; line-height: 1.5; }
+		.creator-panel button { align-self: flex-start; border: 1px solid #d5ccb7; border-radius: 6px; padding: 8px 11px; background: transparent; font-size: 10px; font-weight: 700; cursor: pointer; }
+		.view-title { padding: 35px 0 20px; }
+		.view-title h1 { font-size: 30px; }
+		.view-title p { margin: 0; color: var(--muted); font-size: 12px; }
+		.history-full { display: grid; gap: 9px; }
+		.history-full .history-row { padding: 12px; border: 1px solid var(--line); border-radius: 7px; background: white; }
+		.create-form { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; max-width: 720px; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: white; }
+		.field { display: grid; gap: 6px; }
+		.field.full { grid-column: 1/-1; }
+		.field label { color: #59645b; font-size: 10px; font-weight: 700; }
+		.field input, .field textarea, .field select { width: 100%; border: 1px solid #e0e5dc; border-radius: 6px; padding: 10px; outline: none; background: white; font-size: 12px; }
+		.field textarea { min-height: 104px; resize: vertical; line-height: 1.55; }
+		.field input:focus, .field textarea:focus, .field select:focus { border-color: #a9bd8f; }
+		.form-actions { grid-column: 1/-1; display: flex; align-items: center; gap: 12px; }
+		.form-note { color: var(--muted); font-size: 10px; }
+		.question-editor { display: grid; gap: 12px; }
+		.question-block { display: grid; gap: 8px; padding: 12px; border: 1px solid #edf0e9; border-radius: 7px; background: #fafbf8; }
+		.question-block strong { font-size: 11px; }
+		.question-block input { width: 100%; border: 1px solid #e0e5dc; border-radius: 5px; padding: 8px; font-size: 11px; }
+		.assist-box { max-width: 720px; margin: 0 0 14px; padding: 14px; border: 1px solid #e3e9d8; border-radius: 8px; background: #f1f5e8; }
+		.assist-box-top { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 11px; font-weight: 700; }
+		.assist-box p { margin: 0 0 10px; color: #66705f; font-size: 10px; line-height: 1.5; }
+		.assist-row { display: flex; gap: 7px; }
+		.assist-row input { flex: 1; min-width: 0; border: 1px solid #dce5d2; border-radius: 6px; padding: 9px; outline: none; font-size: 11px; }
+		.assist-row button { border: 0; border-radius: 6px; padding: 0 11px; background: var(--ink); color: #fff; font-size: 10px; font-weight: 700; cursor: pointer; }
+		.quiz-stage { max-width: 720px; }
+		.quiz-progress-row { display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--muted); font-size: 10px; }
+		.progress { height: 5px; overflow: hidden; border-radius: 6px; background: #e8ebe4; }
+		.progress-fill { height: 100%; border-radius: inherit; background: #9bc557; transition: width .25s; }
+		.question-card { margin-top: 16px; padding: 23px; border: 1px solid var(--line); border-radius: 8px; background: white; }
+		.question-card h2 { margin: 10px 0 19px; font: 600 21px/1.3 'Space Grotesk', sans-serif; }
+		.question-number { color: #819064; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+		.answers { display: grid; gap: 8px; }
+		.answer-option { width: 100%; display: flex; align-items: center; gap: 10px; border: 1px solid #e7eae3; border-radius: 6px; padding: 11px; background: white; text-align: left; font-size: 12px; cursor: pointer; }
+		.answer-option:hover:not(:disabled) { border-color: #aac37f; background: #f8faF2; }
+		.answer-option:disabled { cursor: default; }
+		.answer-option.correct { border-color: #9cbe66; background: #f1f7e7; }
+		.answer-option.wrong { border-color: #e8a092; background: #fff2ef; }
+		.answer-letter { width: 23px; height: 23px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 5px; background: #f2f4ef; font-size: 10px; font-weight: 700; }
+		.question-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 17px; }
+		.feedback { color: var(--muted); font-size: 11px; }
+		.result-card { max-width: 720px; padding: 27px; border: 1px solid var(--line); border-radius: 8px; background: white; text-align: center; }
+		.result-score { width: 90px; height: 90px; display: grid; place-items: center; margin: 0 auto 15px; border-radius: 50%; background: #eff5e4; color: #5d762b; font: 700 24px 'Space Grotesk', sans-serif; }
+		.result-card h2 { margin: 0 0 7px; font: 600 23px 'Space Grotesk', sans-serif; }
+		.result-card p { margin: 0 0 18px; color: var(--muted); font-size: 12px; }
+		.result-actions { display: flex; justify-content: center; gap: 8px; }
+		.secondary-button { border: 1px solid var(--line); border-radius: 6px; padding: 10px 13px; background: white; font-size: 11px; font-weight: 700; cursor: pointer; }
+		.toast { position: fixed; z-index: 40; right: 22px; bottom: 22px; max-width: min(360px, calc(100vw - 32px)); padding: 12px 16px; border-radius: 7px; background: var(--ink); color: white; box-shadow: var(--shadow); font-size: 12px; animation: toastIn .22s ease-out; }
+		@keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+		.modal-backdrop { position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(27,34,29,.44); }
+		.modal { width: min(430px, 100%); padding: 22px; border-radius: 10px; background: white; box-shadow: var(--shadow); }
+		.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+		.modal-head h2 { margin: 0; font: 600 19px 'Space Grotesk', sans-serif; }
+		.modal-close { width: 30px; height: 30px; border: 0; border-radius: 50%; background: #f0f2ed; cursor: pointer; }
+		.modal p { color: var(--muted); font-size: 11px; line-height: 1.55; }
+		.modal textarea { width: 100%; min-height: 75px; margin: 3px 0 10px; border: 1px solid var(--line); border-radius: 6px; padding: 10px; resize: vertical; font-size: 12px; }
+		.modal-response { margin-top: 11px; padding: 12px; border-radius: 6px; background: #f3f6ed; color: #4e5e3a; font-size: 11px; line-height: 1.55; white-space: pre-line; }
+		.hidden { display: none !important; }
+		@media (max-width: 1000px) {
+			.app { grid-template-columns: 205px minmax(0, 1fr); }
+			main { padding-right: 28px; padding-left: 28px; }
+			.quiz-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+		}
+		@media (max-width: 700px) {
+			.app { display: block; padding-bottom: 64px; }
+			.sidebar { position: fixed; z-index: 15; right: 0; bottom: 0; left: 0; height: 59px; display: block; padding: 0 7px; border-top: 1px solid var(--line); border-right: 0; background: #fff; }
+			.brand, .side-label, .sidebar-rule, .topics-nav, .sidebar-bottom { display: none; }
+			.nav { height: 100%; grid-template-columns: repeat(4, 1fr); align-items: center; }
+			.nav button { height: 51px; justify-content: center; flex-direction: column; gap: 2px; padding: 3px; font-size: 9px; }
+			.nav-icon { font-size: 16px; }
+			.nav-count { display: none; }
+			main { padding: 0 17px 28px; }
+			.topbar { height: 60px; }
+			.breadcrumb { font-size: 10px; }
+			.create-button { padding: 9px 10px; font-size: 10px; }
+			.create-button span:first-child { font-size: 15px; }
+			.top-actions { gap: 7px; }
+			.icon-button { width: 33px; height: 33px; }
+			.welcome { padding: 25px 0 18px; align-items: flex-start; }
+			h1 { font-size: 28px; }
+			.welcome p { max-width: 245px; font-size: 11px; line-height: 1.5; }
+			.streak { gap: 5px; padding: 7px; }
+			.streak-icon { font-size: 16px; }
+			.streak span:last-child { display: none; }
+			.streak strong { font-size: 10px; }
+			.search { height: 45px; }
+			.search-hint { display: none; }
+			.hero { grid-template-columns: 1fr 130px; min-height: 225px; }
+			.hero-copy { padding: 20px 17px; }
+			.hero h2 { font-size: 21px; }
+			.hero p { font-size: 10px; line-height: 1.5; }
+			.hero-art { min-height: 225px; }
+			.hero-art:after { background: linear-gradient(90deg, #d9edbd 0%, rgba(217,237,189,.25) 35%, transparent 100%); }
+			.stats { margin: 15px 0 24px; }
+			.stat { gap: 7px; padding: 10px 8px; }
+			.stat-mark { width: 25px; height: 25px; font-size: 12px; }
+			.stat strong { font-size: 13px; }
+			.stat span:last-child { font-size: 8px; }
+			.quiz-grid { gap: 9px; }
+			.cover { height: 88px; }
+			.quiz-info { padding: 9px; }
+			.quiz-title { font-size: 11px; }
+			.quiz-meta { gap: 5px; font-size: 9px; }
+			.rating { font-size: 9px; }
+			.lower-grid { grid-template-columns: 1fr; margin-top: 25px; }
+			.create-form { grid-template-columns: 1fr; padding: 14px; }
+			.field.full, .form-actions { grid-column: auto; }
+			.view-title { padding: 26px 0 17px; }
+			.view-title h1 { font-size: 26px; }
+		}
+		@media (max-width: 380px) {
+			.hero { grid-template-columns: 1fr 90px; }
+			.hero h2 { font-size: 19px; }
+			.quiz-grid { grid-template-columns: 1fr; }
+			.cover { height: 115px; }
+			.streak { display: none; }
+		}
+	</style>
+</head>
+<body>
+	<div class="app">
+		<aside class="sidebar">
+			<a class="brand" href="#home" aria-label="Quizwizz home"><span class="brand-mark">q</span><span class="brand-name">quizwizz</span></a>
+			<p class="side-label">Workspace</p>
+			<nav class="nav" aria-label="Main navigation">
+				<button class="active" data-view="home"><span class="nav-icon">⌂</span>Explore</button>
+				<button data-view="history"><span class="nav-icon">◷</span>My history<span class="nav-count" id="history-count">0</span></button>
+				<button data-view="saved"><span class="nav-icon">♡</span>Saved quizzes</button>
+				<button data-view="create"><span class="nav-icon">＋</span>Create a quiz</button>
+			</nav>
+			<div class="sidebar-rule"></div>
+			<p class="side-label">Browse topics</p>
+			<nav class="topics-nav" id="topic-nav" aria-label="Browse by topic"></nav>
+			<div class="sidebar-bottom">
+				<div class="assistant-promo"><span class="spark">✳</span><h3>Your quiz sidekick</h3><p>Brainstorm a topic or get a nudge on your next quiz.</p><button id="open-assistant">Ask the assistant ↗</button></div>
+				<div class="user-row"><div class="avatar">Y</div><div><div class="user-name">Your space</div><div class="user-caption">Curiosity looks good on you</div></div></div>
+			</div>
+		</aside>
+		<main>
+			<header class="topbar"><div class="breadcrumb">Workspace <span> / </span> <strong id="breadcrumb">Explore</strong></div><div class="top-actions"><button class="icon-button" id="top-assistant" aria-label="Open quiz assistant" title="Quiz assistant">✳</button><button class="create-button" data-go="create"><span>＋</span><span>Create quiz</span></button></div></header>
+			<div class="page" id="page"></div>
+		</main>
+	</div>
+	<div id="modal-root"></div>
+	<div id="toast-root" aria-live="polite"></div>
+	<script>
+		const categories = [
+			{ name: 'Science', icon: '◉', color: '#91c4df', photo: 'photo-1532094349884-543bc11b234d' },
+			{ name: 'History', icon: '◷', color: '#e7b77c', photo: 'photo-1461360228754-6e81c478b882' },
+			{ name: 'Geography', icon: '◎', color: '#92c895', photo: 'photo-1464822759023-fed622ff2c3b' },
+			{ name: 'Arts & culture', icon: '◈', color: '#d3a9d9', photo: 'photo-1541961017774-22349e4a1262' },
+			{ name: 'Technology', icon: '⌘', color: '#8eb8dc', photo: 'photo-1518770660439-4636190af475' },
+			{ name: 'Nature', icon: '❋', color: '#94bd7b', photo: 'photo-1441974231531-c6227db76b6e' },
+			{ name: 'Food', icon: '◒', color: '#edaa75', photo: 'photo-1490645935967-10de6ba17061' },
+			{ name: 'Sports', icon: '◉', color: '#ee917e', photo: 'photo-1461896836934-ffe607ba8211' },
+			{ name: 'Literature', icon: '▤', color: '#b5a2d8', photo: 'photo-1455390582262-044c8b32e1e8' },
+			{ name: 'Math', icon: '＋', color: '#e9d075', photo: 'photo-1509228468518-180dd4864904' },
+			{ name: 'Movies & TV', icon: '▣', color: '#d3a9d9', photo: 'photo-1489599849927-2ee91cede3ba' }
+		];
+		const questionBanks = {
+			Science: [
+				['What is the closest star to Earth?', ['Sirius', 'The Sun', 'Proxima Centauri', 'Vega'], 1],
+				['Which planet has the most visible rings?', ['Mars', 'Venus', 'Saturn', 'Mercury'], 2],
+				['What gas do plants absorb from the atmosphere?', ['Oxygen', 'Nitrogen', 'Carbon dioxide', 'Helium'], 2],
+				['What is the chemical symbol for gold?', ['Ag', 'Au', 'Gd', 'Go'], 1],
+				['Which part of a cell contains most of its DNA?', ['Nucleus', 'Membrane', 'Ribosome', 'Cytoplasm'], 0],
+				['How many bones are in an adult human body?', ['106', '206', '306', '406'], 1],
+				['What force keeps planets in orbit around the Sun?', ['Friction', 'Magnetism', 'Gravity', 'Buoyancy'], 2]
+			],
+			History: [
+				['In which year did the first Moon landing take place?', ['1959', '1969', '1979', '1989'], 1],
+				['Which ancient civilization built Machu Picchu?', ['Maya', 'Aztec', 'Inca', 'Olmec'], 2],
+				['What was the name of the ship Charles Darwin sailed on?', ['Endeavour', 'Beagle', 'Victory', 'Discovery'], 1],
+				['The Renaissance began in which country?', ['France', 'Italy', 'Spain', 'England'], 1],
+				['Which city was divided by a wall from 1961 to 1989?', ['Vienna', 'Prague', 'Berlin', 'Warsaw'], 2],
+				['Who was the first woman to fly solo across the Atlantic?', ['Bessie Coleman', 'Amelia Earhart', 'Harriet Quimby', 'Valentina Tereshkova'], 1],
+				['Which ancient wonder stood in Alexandria?', ['Colossus', 'Hanging Gardens', 'Lighthouse', 'Temple of Artemis'], 2]
+			],
+			Geography: [
+				['What is the capital of New Zealand?', ['Auckland', 'Wellington', 'Christchurch', 'Dunedin'], 1],
+				['Which is the largest ocean on Earth?', ['Atlantic', 'Indian', 'Arctic', 'Pacific'], 3],
+				['Which country is home to the city of Marrakech?', ['Egypt', 'Morocco', 'Tunisia', 'Jordan'], 1],
+				['What is the longest river in South America?', ['Paraná', 'Orinoco', 'Amazon', 'São Francisco'], 2],
+				['Which continent has the most countries?', ['Asia', 'Africa', 'Europe', 'South America'], 1],
+				['Mount Kilimanjaro is in which country?', ['Kenya', 'Tanzania', 'Uganda', 'Ethiopia'], 1],
+				['What is the smallest independent country by area?', ['Monaco', 'Nauru', 'Vatican City', 'San Marino'], 2]
+			],
+			'Arts & culture': [
+				['Who painted The Starry Night?', ['Claude Monet', 'Vincent van Gogh', 'Paul Cézanne', 'Edgar Degas'], 1],
+				['Which instrument has 88 keys?', ['Violin', 'Harp', 'Piano', 'Accordion'], 2],
+				['In which city is the Louvre museum?', ['Rome', 'Paris', 'Madrid', 'Brussels'], 1],
+				['Which dance originated in Argentina and Uruguay?', ['Samba', 'Tango', 'Flamenco', 'Rumba'], 1],
+				['What is the Japanese art of paper folding called?', ['Ikebana', 'Origami', 'Ukiyo-e', 'Bonsai'], 1],
+				['Which composer wrote The Four Seasons?', ['Mozart', 'Bach', 'Vivaldi', 'Chopin'], 2],
+				['A sculpture made by carving is most traditionally made from what?', ['Stone', 'Glass', 'Paper', 'Fabric'], 0]
+			],
+			Technology: [
+				['What does the “www” in a web address stand for?', ['World Wide Web', 'Web Wire Way', 'Wide World Window', 'World Web Wire'], 0],
+				['Which company created the Android operating system?', ['Apple', 'Google', 'IBM', 'Nokia'], 1],
+				['What does CPU stand for?', ['Central Processing Unit', 'Computer Power Utility', 'Core Program Upload', 'Central Program User'], 0],
+				['Which of these is a programming language?', ['HTML', 'Bluetooth', 'Python', 'Wi-Fi'], 2],
+				['What does GPS help you determine?', ['Weather', 'Location', 'Blood type', 'Internet speed'], 1],
+				['Which company launched the first iPhone?', ['Samsung', 'Microsoft', 'Apple', 'BlackBerry'], 2],
+				['What is the main purpose of a QR code?', ['Store scannable information', 'Charge a device', 'Boost Wi-Fi', 'Protect a screen'], 0]
+			],
+			Nature: [
+				['What is the only mammal capable of true flight?', ['Flying squirrel', 'Bat', 'Sugar glider', 'Colugo'], 1],
+				['What is a group of flamingos called?', ['A parade', 'A flamboyance', 'A colony', 'A shimmer'], 1],
+				['Which tree produces acorns?', ['Maple', 'Birch', 'Oak', 'Ash'], 2],
+				['What is the largest species of penguin?', ['King penguin', 'Emperor penguin', 'Macaroni penguin', 'Gentoo penguin'], 1],
+				['What is the process by which a caterpillar becomes a butterfly?', ['Germination', 'Metamorphosis', 'Pollination', 'Migration'], 1],
+				['Which animal has three hearts?', ['Dolphin', 'Octopus', 'Sea turtle', 'Shark'], 1],
+				['What is the name for a baby swan?', ['Chick', 'Calf', 'Cygnet', 'Fledgling'], 2]
+			],
+			Food: [
+				['Which spice gives many curries their yellow color?', ['Paprika', 'Turmeric', 'Cumin', 'Saffron'], 1],
+				['What is the main ingredient in traditional hummus?', ['Lentils', 'Chickpeas', 'Edamame', 'White beans'], 1],
+				['Which country is credited with inventing pizza as we know it?', ['Greece', 'France', 'Italy', 'Turkey'], 2],
+				['What kind of pastry is used to make profiteroles?', ['Filo', 'Choux', 'Puff', 'Shortcrust'], 1],
+				['Which fruit is dried to make a prune?', ['Apricot', 'Plum', 'Date', 'Fig'], 1],
+				['What is the main ingredient in guacamole?', ['Zucchini', 'Avocado', 'Peas', 'Cucumber'], 1],
+				['Which grain is traditionally used to make risotto?', ['Basmati', 'Arborio rice', 'Quinoa', 'Couscous'], 1]
+			],
+			Sports: [
+				['How many players from one team are on a soccer field?', ['9', '10', '11', '12'], 2],
+				['In tennis, what does “love” mean?', ['A tie', 'Zero points', 'Match point', 'A replay'], 1],
+				['How many rings are on the Olympic flag?', ['Four', 'Five', 'Six', 'Seven'], 1],
+				['Which sport uses a shuttlecock?', ['Squash', 'Badminton', 'Table tennis', 'Lacrosse'], 1],
+				['How long is a marathon?', ['21.1 km', '40 km', '42.195 km', '50 km'], 2],
+				['In which sport would you perform a slam dunk?', ['Volleyball', 'Basketball', 'Handball', 'Netball'], 1],
+				['What is the term for three strikes in a row in bowling?', ['Eagle', 'Turkey', 'Hat trick', 'Triple'], 1]
+			],
+			Literature: [
+				['Who wrote Pride and Prejudice?', ['Charlotte Brontë', 'Jane Austen', 'Mary Shelley', 'George Eliot'], 1],
+				['What is the name of the hobbit in The Hobbit?', ['Frodo Baggins', 'Bilbo Baggins', 'Samwise Gamgee', 'Pippin Took'], 1],
+				['Who wrote the play Romeo and Juliet?', ['William Shakespeare', 'Christopher Marlowe', 'Oscar Wilde', 'Ben Jonson'], 0],
+				['In which book would you meet Atticus Finch?', ['Of Mice and Men', 'To Kill a Mockingbird', 'The Great Gatsby', 'Little Women'], 1],
+				['What is the name of Sherlock Holmes’s friend and biographer?', ['Inspector Lestrade', 'Mycroft Holmes', 'Dr. Watson', 'Irene Adler'], 2],
+				['Who wrote The Cat in the Hat?', ['Roald Dahl', 'Dr. Seuss', 'Beatrix Potter', 'Maurice Sendak'], 1],
+				['Which novel begins with the line “Call me Ishmael”?', ['Treasure Island', 'Moby-Dick', 'The Old Man and the Sea', 'Robinson Crusoe'], 1]
+			],
+			Math: [
+				['What is the sum of the interior angles of a triangle?', ['90°', '180°', '270°', '360°'], 1],
+				['What is the square root of 144?', ['10', '11', '12', '14'], 2],
+				['What is the next prime number after 7?', ['9', '10', '11', '13'], 2],
+				['How many sides does a hexagon have?', ['Five', 'Six', 'Seven', 'Eight'], 1],
+				['What is 15% of 200?', ['15', '20', '30', '40'], 2],
+				['What is the value of pi rounded to two decimal places?', ['3.12', '3.14', '3.16', '3.41'], 1],
+				['What is the perimeter of a square with sides of 5 cm?', ['10 cm', '15 cm', '20 cm', '25 cm'], 2]
+			],
+			'Movies & TV': [
+				['Which film series features the wizarding school Hogwarts?', ['Star Wars', 'Harry Potter', 'The Lord of the Rings', 'The Hunger Games'], 1],
+				['What is the name of the theme park island in Jurassic Park?', ['Isla Nublar', 'Skull Island', 'Isla Sorna', 'Nublar Bay'], 0],
+				['What is the name of the lion cub in The Lion King?', ['Mufasa', 'Timon', 'Simba', 'Rafiki'], 2],
+				['Who directed the 1975 film Jaws?', ['George Lucas', 'Francis Ford Coppola', 'Martin Scorsese', 'Steven Spielberg'], 3],
+				['What is the name of the kingdom in Frozen?', ['Arendelle', 'Corona', 'Genovia', 'DunBroch'], 0],
+				['What is the name of the fictional continent in Game of Thrones?', ['Essos', 'Westeros', 'Middle-earth', 'Narnia'], 1],
+				['In which fictional Indiana town is Stranger Things set?', ['Riverdale', 'Hawkins', 'Sunnydale', 'Stars Hollow'], 1],
+				['What is the name of the paper company in The Office (US)?', ['Paper Plus', 'Wernham Hogg', 'Dunder Mifflin', 'Staples'], 2],
+				['What is the name of the coffee shop often visited by the Friends characters?', ['Central Perk', 'Café Nervosa', 'Monk’s Café', 'The Peach Pit'], 0],
+				['Which character is the central chemistry teacher in Breaking Bad?', ['Jesse Pinkman', 'Walter White', 'Hank Schrader', 'Saul Goodman'], 1],
+				['Which actor plays Sherlock Holmes in the BBC series Sherlock?', ['David Tennant', 'Martin Freeman', 'Benedict Cumberbatch', 'Tom Hiddleston'], 2],
+				['What is the name of the time machine in Doctor Who?', ['TARDIS', 'DeLorean', 'Bebop', 'Serenity'], 0],
+				['The Mandalorian is part of which franchise?', ['Star Trek', 'Dune', 'Star Wars', 'Stargate'], 2],
+				['Which film features a time-traveling DeLorean car?', ['Blade Runner', 'Back to the Future', 'Ghostbusters', 'The Terminator'], 1],
+				['What is the fictional African nation associated with Black Panther?', ['Genosha', 'Latveria', 'Wakanda', 'Sokovia'], 2],
+				['In Toy Story, what is the name of the cowboy doll?', ['Woody', 'Buzz', 'Rex', 'Andy'], 0],
+				['What is the name of the school in the series Wednesday?', ['Hogwarts', 'Nevermore Academy', 'East High', 'Xavier’s School'], 1],
+				['Which animated TV family lives in Springfield?', ['The Griffins', 'The Belchers', 'The Simpsons', 'The Flintstones'], 2],
+				['In Seinfeld, what is the name of the character played by Jason Alexander?', ['Jerry', 'George', 'Cosmo', 'Newman'], 1],
+				['What sport does coach Ted Lasso coach in the series?', ['Baseball', 'Basketball', 'Rugby', 'Football (soccer)'], 3]
+			]
+		};
+		const coverPhotos = {
+			Science: 'photo-1532094349884-543bc11b234d', History: 'photo-1461360228754-6e81c478b882', Geography: 'photo-1464822759023-fed622ff2c3b',
+			'Arts & culture': 'photo-1541961017774-22349e4a1262', Technology: 'photo-1518770660439-4636190af475', Nature: 'photo-1441974231531-c6227db76b6e',
+			Food: 'photo-1490645935967-10de6ba17061', Sports: 'photo-1461896836934-ffe607ba8211', Literature: 'photo-1455390582262-044c8b32e1e8', Math: 'photo-1509228468518-180dd4864904',
+			'Movies & TV': 'photo-1489599849927-2ee91cede3ba'
+		};
+		const topics = Object.keys(questionBanks);
+		const titleStyles = ['Quickfire', 'Brain warm-up', 'The big challenge', 'Curiosity club', 'Five-minute mix', 'Bright sparks', 'Pocket trivia', 'Think fast', 'Daily discovery', 'Knowledge sprint'];
+		const catalog = [];
+		for (let number = 0; number < topics.length * 1000; number++) {
+			const topic = topics[number % topics.length];
+			const pack = Math.floor(number / topics.length) + 1;
+			catalog.push({
+				id: `q-${number + 1}`, topic, pack,
+				title: pack <= 10 ? `${topic}: ${titleStyles[pack - 1]}` : `${topic}: ${titleStyles[(pack - 1) % titleStyles.length]} ${pack}`,
+				count: 5, minutes: 3 + (pack % 3), difficulty: ['Easy', 'Medium', 'Hard'][pack % 3],
+				questions: questionBanks[topic]
+			});
+		}
+		const featuredIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+		const featured = featuredIds.map(index => catalog[index]);
+		const state = {
+			view: 'home', topic: 'All topics', query: '',
+			history: load('qw-history', []), saved: load('qw-saved', []),
+			custom: load('qw-custom', []), done: load('qw-done', []),
+			session: null
+		};
+		const page = document.getElementById('page');
+		function load(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
+		function persist() {
+			localStorage.setItem('qw-history', JSON.stringify(state.history));
+			localStorage.setItem('qw-saved', JSON.stringify(state.saved));
+			localStorage.setItem('qw-custom', JSON.stringify(state.custom));
+			localStorage.setItem('qw-done', JSON.stringify(state.done));
+		}
+		function escapeHTML(value) { return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }
+		function imageUrl(id) { return `https://images.unsplash.com/${id}?auto=format&fit=crop&w=700&q=78`; }
+		function categoryFor(name) { return categories.find(item => item.name === name) || categories[0]; }
+		function renderTopicNav() {
+			document.getElementById('topic-nav').innerHTML = categories.map(topic => `<button data-topic="${escapeHTML(topic.name)}"><span class="topic-dot" style="--dot:${topic.color}"></span>${escapeHTML(topic.name)}</button>`).join('');
+			document.getElementById('history-count').textContent = state.history.length;
+		}
+		function quizCard(quiz) {
+			const category = categoryFor(quiz.topic);
+			const saved = state.saved.includes(quiz.id);
+			return `<article class="quiz-card"><div class="cover" style="--cover:#e5e9dd url('${imageUrl(category.photo)}')"><span class="cover-label">${category.icon} &nbsp;${escapeHTML(quiz.topic)}</span><button class="cover-bookmark ${saved ? 'saved' : ''}" data-save="${escapeHTML(quiz.id)}" aria-label="${saved ? 'Remove saved quiz' : 'Save quiz'}" title="${saved ? 'Remove saved quiz' : 'Save quiz'}">${saved ? '♥' : '♡'}</button></div><div class="quiz-info"><div class="quiz-title-row"><h3 class="quiz-title">${escapeHTML(quiz.title)}</h3><span class="rating">★ 4.9</span></div><div class="quiz-meta"><span>${quiz.count || 5} questions</span><span>·</span><span>${quiz.minutes || 3} min</span></div><div class="quiz-bottom"><span class="level">${escapeHTML(quiz.difficulty || 'Mixed')}</span><button class="play-button" data-play="${escapeHTML(quiz.id)}" aria-label="Play ${escapeHTML(quiz.title)}">▶</button></div></div></article>`;
+		}
+		function homeView() {
+			const filtered = (state.topic === 'All topics' ? catalog : catalog.filter(quiz => quiz.topic === state.topic))
+				.filter(quiz => `${quiz.title} ${quiz.topic}`.toLowerCase().includes(state.query.toLowerCase()))
+				.slice(0, state.query || state.topic !== 'All topics' ? 18 : 6);
+			const showHero = !state.query && state.topic === 'All topics';
+			return `<div class="welcome"><div><div class="eyebrow">A little learning goes a long way</div><h1>Curiosity, on tap.</h1><p>Find your next favorite rabbit hole. One question at a time.</p></div><div class="streak"><span class="streak-icon">✳</span><div><strong>${state.history.length ? `${state.history.length} quiz${state.history.length === 1 ? '' : 'zes'} played` : 'Fresh start'}</strong><span>Your next good idea is a quiz away</span></div></div></div>
+				<div class="search-wrap"><span class="search-icon">⌕</span><input id="quiz-search" class="search" type="search" value="${escapeHTML(state.query)}" placeholder="Search ${catalog.length.toLocaleString()} quizzes, topics, and more…" aria-label="Search quizzes"><span class="search-hint">Try “space” or “history”</span></div>
+				${showHero ? `<section class="hero"><div class="hero-copy"><span class="hero-tag">✳ &nbsp; A good place to start</span><h2>Small quiz. Big brain energy.</h2><p>Take a quick trip through the things you thought you knew.</p><button class="hero-cta" data-play="q-1">Play today’s mix <span>→</span></button></div><div class="hero-art" role="img" aria-label="Books and notes on a learning desk"></div></section>
+				<div class="stats"><div class="stat"><span class="stat-mark" style="--stat-bg:#e9f1dc">▤</span><div><strong>${catalog.length.toLocaleString()}</strong><span>quizzes to explore</span></div></div><div class="stat"><span class="stat-mark" style="--stat-bg:#fae8dd">◉</span><div><strong>${topics.length} topics</strong><span>something for every mood</span></div></div><div class="stat"><span class="stat-mark" style="--stat-bg:#e5eff5">✳</span><div><strong>Yours to make</strong><span>create a quiz in minutes</span></div></div></div>` : ''}
+				<section><div class="section-heading"><div><h2>${state.query ? 'Search results' : state.topic === 'All topics' ? 'Pick a rabbit hole' : state.topic}</h2><p>${state.query ? `${filtered.length} shown from a library of ${catalog.length.toLocaleString()}` : 'A few favorites to get you going'}</p></div>${state.query || state.topic !== 'All topics' ? `<button class="text-button" data-clear>Clear filters</button>` : `<button class="text-button" data-view="saved">Your saved quizzes →</button>`}</div>
+					<div class="filters">${['All topics', ...topics].map(topic => `<button class="filter-chip ${state.topic === topic ? 'active' : ''}" data-filter="${escapeHTML(topic)}">${topic === 'All topics' ? '✳ ' : ''}${escapeHTML(topic)}</button>`).join('')}</div>
+					<div class="quiz-grid">${filtered.length ? filtered.map(quizCard).join('') : `<div class="empty-state">No quizzes found for “${escapeHTML(state.query)}”. Try another search or topic.</div>`}</div>
+				</section>
+				<div class="lower-grid"><section class="lower-panel"><div class="panel-heading"><h3>Recent scores</h3><button class="text-button" data-view="history">See all →</button></div>${historyMarkup(4)}</section><section class="lower-panel creator-panel"><div><span class="eyebrow">Make it yours</span><h3>Your curiosity, your quiz.</h3><p>Build a quiz for your friends, your class, or future you.</p></div><button data-view="create">Start creating &nbsp;→</button></section></div>`;
+		}
+		function historyMarkup(limit = Infinity) {
+			if (!state.history.length) return '<div class="history-empty">Your completed quizzes and scores will show up here.</div>';
+			return `<div class="${limit === Infinity ? 'history-full' : 'history-list'}">${state.history.slice(0, limit).map(item => `<div class="history-row"><span class="history-icon" style="--history-bg:${categoryFor(item.topic).color}44">${categoryFor(item.topic).icon}</span><span class="history-title">${escapeHTML(item.title)}</span><span class="history-date">${escapeHTML(item.date)}</span><strong class="history-score">${item.score}/${item.total}</strong></div>`).join('')}</div>`;
+		}
+		function historyView() {
+			return `<div class="view-title"><div class="eyebrow">Your learning trail</div><h1>My history</h1><p>Every quiz is a little proof of what you know.</p></div><section class="lower-panel">${historyMarkup()}</section>`;
+		}
+		function savedView() {
+			const quizzes = state.saved.map(id => findQuiz(id)).filter(Boolean);
+			return `<div class="view-title"><div class="eyebrow">Keep the good ones close</div><h1>Saved quizzes</h1><p>Your shortlist for another curious day.</p></div><div class="quiz-grid">${quizzes.length ? quizzes.map(quizCard).join('') : '<div class="empty-state">No saved quizzes yet. Tap the heart on a quiz to keep it here.</div>'}</div>`;
+		}
+		function createView() {
+			return `<div class="view-title"><div class="eyebrow">Make something worth sharing</div><h1>Create a quiz</h1><p>Write your own questions, or get a little help finding your angle.</p></div>
+				<section class="assist-box"><div class="assist-box-top"><span>✳</span> Quiz idea assistant <span style="color:#8a9482;font-weight:400">· local demo</span></div><p>Enter a topic or question for a ready-to-use answer or quiz idea. This demo uses built-in content; live AI needs an API connection.</p><div class="assist-row"><input id="assist-topic" placeholder="e.g. ocean life, 90s music, space…" aria-label="Topic or question for quiz idea"><button id="assist-generate">Get an answer</button></div><div id="assist-result"></div></section>
+				<form class="create-form" id="quiz-form"><div class="field"><label for="custom-title">Quiz title</label><input id="custom-title" name="title" placeholder="e.g. The curious cook’s quiz" required maxlength="70"></div><div class="field"><label for="custom-topic">Topic</label><select id="custom-topic" name="topic">${topics.map(topic => `<option>${escapeHTML(topic)}</option>`).join('')}<option>Other</option></select></div><div class="field full"><label>Questions & answer options</label><div class="question-editor" id="question-editor">${questionEditor()}</div></div><div class="form-actions"><button type="button" class="secondary-button" id="add-question">＋ Add question</button><button type="submit" class="create-button">Save my quiz →</button><span class="form-note">Your quiz is saved on this device.</span></div></form>
+				${state.custom.length ? `<div class="section-heading" style="margin-top:27px"><div><h2>Your creations</h2><p>${state.custom.length} quiz${state.custom.length === 1 ? '' : 'zes'}</p></div></div><div class="quiz-grid">${state.custom.map(quizCard).join('')}</div>` : ''}`;
+		}
+		function questionEditor() {
+			return `<div class="question-block"><strong>Question 1</strong><input name="question" placeholder="Write your question…" required><input name="answer" placeholder="Correct answer…" required></div>`;
+		}
+		function findQuiz(id) { return state.custom.find(quiz => quiz.id === id) || catalog.find(quiz => quiz.id === id); }
+		function render() {
+			renderTopicNav();
+			document.querySelectorAll('.nav button').forEach(button => button.classList.toggle('active', button.dataset.view === state.view));
+			const names = { home: 'Explore', history: 'My history', saved: 'Saved quizzes', create: 'Create a quiz', play: 'Playing' };
+			document.getElementById('breadcrumb').textContent = names[state.view] || 'Explore';
+			if (state.view === 'home') page.innerHTML = homeView();
+			else if (state.view === 'history') page.innerHTML = historyView();
+			else if (state.view === 'saved') page.innerHTML = savedView();
+			else if (state.view === 'create') page.innerHTML = createView();
+			else if (state.view === 'play') page.innerHTML = playView();
+		}
+		function go(view, topic = null) {
+			state.view = view;
+			if (topic !== null) { state.topic = topic; state.query = ''; }
+			render();
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		}
+		function startQuiz(id) {
+			const quiz = findQuiz(id);
+			if (!quiz) return;
+			const bank = quiz.questions || questionBanks[quiz.topic] || questionBanks.Science;
+			const available = bank.filter(question => !state.done.includes(`${quiz.id}:${question[0]}`));
+			const pool = available.length >= Math.min(5, bank.length) ? available : bank;
+			const shuffled = [...pool].sort(() => Math.random() - .5).slice(0, Math.min(5, pool.length)).map(question => ({ prompt: question[0], options: [...question[1]], answer: question[2] }));
+			shuffled.forEach(question => question.options = question.options.map((text, index) => ({ text, correct: index === question.answer })).sort(() => Math.random() - .5));
+			state.session = { quiz, questions: shuffled, index: 0, score: 0, answered: false };
+			state.view = 'play'; render(); window.scrollTo({ top: 0, behavior: 'smooth' });
+		}
+		function playView() {
+			const session = state.session;
+			if (!session) return '<div class="empty-state">Choose a quiz to play.</div>';
+			if (session.index >= session.questions.length) return resultView();
+			const question = session.questions[session.index];
+			return `<div class="view-title"><div class="eyebrow">${escapeHTML(session.quiz.topic)} · ${escapeHTML(session.quiz.title)}</div><h1>Quiz time.</h1><p>Go with your first thought. You’ve got this.</p></div><div class="quiz-stage"><div class="quiz-progress-row"><span>Question ${session.index + 1} of ${session.questions.length}</span><span>${session.score} correct so far</span></div><div class="progress"><div class="progress-fill" style="width:${session.index / session.questions.length * 100}%"></div></div><section class="question-card"><span class="question-number">Question ${session.index + 1}</span><h2>${escapeHTML(question.prompt)}</h2><div class="answers">${question.options.map((option, index) => `<button class="answer-option" data-answer="${index}" ${session.answered ? 'disabled' : ''}><span class="answer-letter">${String.fromCharCode(65 + index)}</span>${escapeHTML(option.text)}</button>`).join('')}</div><div class="question-foot"><span class="feedback" id="answer-feedback">${session.answered ? 'Answer locked in.' : 'Pick the best answer.'}</span><button class="create-button ${session.answered ? '' : 'hidden'}" id="next-question">${session.index === session.questions.length - 1 ? 'See my score' : 'Next question'} →</button></div></section><button class="text-button" style="margin-top:15px" data-view="home">← Leave quiz</button></div>`;
+		}
+		function resultView() {
+			const session = state.session;
+			const total = session.questions.length;
+			const percentage = Math.round(session.score / total * 100);
+			const message = percentage === 100 ? 'Perfect score. You really know your stuff.' : percentage >= 60 ? 'Nicely done. Your curiosity is paying off.' : 'Every question is a new thing learned.';
+			return `<div class="view-title"><div class="eyebrow">${escapeHTML(session.quiz.topic)} · quiz complete</div><h1>That’s a wrap.</h1><p>Your score has been added to your history.</p></div><section class="result-card"><div class="result-score">${percentage}%</div><h2>${session.score} out of ${total}</h2><p>${message}</p><div class="result-actions"><button class="secondary-button" data-view="history">View history</button><button class="create-button" data-view="home">Find another quiz →</button></div></section>`;
+		}
+		function finishQuiz() {
+			const session = state.session;
+			session.questions.forEach(question => state.done.push(`${session.quiz.id}:${question.prompt}`));
+			state.history.unshift({ id: session.quiz.id, title: session.quiz.title, topic: session.quiz.topic, score: session.score, total: session.questions.length, date: new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(new Date()) });
+			state.history = state.history.slice(0, 100);
+			persist(); session.index = session.questions.length; render(); window.scrollTo({ top: 0, behavior: 'smooth' });
+		}
+		function toggleSave(id) {
+			state.saved = state.saved.includes(id) ? state.saved.filter(savedId => savedId !== id) : [id, ...state.saved];
+			persist(); render(); toast(state.saved.includes(id) ? 'Added to saved quizzes.' : 'Removed from saved quizzes.');
+		}
+		function openAssistant() {
+			document.getElementById('modal-root').innerHTML = `<div class="modal-backdrop" data-dismiss><section class="modal" role="dialog" aria-modal="true" aria-labelledby="assistant-title"><div class="modal-head"><h2 id="assistant-title">Your quiz sidekick ✳</h2><button class="modal-close" data-close aria-label="Close">×</button></div><p>Ask a question for a direct answer, or enter a topic for a ready-to-use quiz idea. This demo uses built-in content; live AI needs an API connection.</p><textarea id="assistant-prompt" placeholder="Ask a question or enter a quiz topic"></textarea><button class="create-button" id="assistant-ask">Get an answer →</button><div id="assistant-response"></div></section></div>`;
+		}
+		function suggestion(prompt) {
+			const cleanPrompt = prompt.trim();
+			const normalized = cleanPrompt.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
+			const stopWords = new Set(['about', 'answer', 'could', 'create', 'does', 'give', 'help', 'make', 'please', 'quiz', 'tell', 'that', 'the', 'this', 'what', 'with', 'would']);
+			const queryWords = [...new Set(normalized.split(' ').filter(word => word.length > 2 && !stopWords.has(word)))];
+
+			if (queryWords.length >= 2) {
+				let bestMatch = null;
+				let bestScore = 0;
+				for (const [topic, questions] of Object.entries(questionBanks)) {
+					for (const [question, options, answer] of questions) {
+						const questionWords = new Set(question.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/));
+						const score = queryWords.filter(word => questionWords.has(word)).length;
+						if (score > bestScore) {
+							bestScore = score;
+							bestMatch = { topic, question, answer: options[answer] };
+						}
+					}
+				}
+				if (bestMatch && bestScore >= Math.min(2, queryWords.length)) {
+					return `Answer: ${bestMatch.answer}.\n\n${bestMatch.question} (${bestMatch.topic})`;
+				}
+			}
+
+			const topicAliases = {
+				Science: ['science', 'space', 'planet', 'star', 'biology', 'chemistry', 'physics'],
+				History: ['history', 'historical', 'ancient', 'renaissance', 'moon landing'],
+				Geography: ['geography', 'country', 'countries', 'capital', 'ocean', 'river', 'mountain'],
+				'Arts & culture': ['art', 'arts', 'culture', 'music', 'painting', 'dance', 'museum'],
+				'Movies & TV': ['movie', 'movies', 'film', 'films', 'tv', 'television', 'series', 'sitcom', 'cinema'],
+				Technology: ['technology', 'tech', 'computer', 'programming', 'internet', 'phone'],
+				Nature: ['nature', 'animal', 'animals', 'wildlife', 'plant', 'plants', 'tree'],
+				Food: ['food', 'cooking', 'recipe', 'cuisine', 'ingredient'],
+				Sports: ['sport', 'sports', 'football', 'soccer', 'tennis', 'olympic'],
+				Literature: ['literature', 'book', 'books', 'novel', 'poetry', 'author'],
+				Math: ['math', 'mathematics', 'algebra', 'geometry', 'equation']
+			};
+			const paddedPrompt = ` ${normalized} `;
+			const matchedTopic = Object.entries(topicAliases).find(([, aliases]) => aliases.some(alias => paddedPrompt.includes(` ${alias} `)));
+			const topic = matchedTopic ? matchedTopic[0] : 'Science';
+			const topicMatch = cleanPrompt.match(/\b(?:about|on|for)\s+(.+)$/i);
+			const displayTopic = (topicMatch ? topicMatch[1] : cleanPrompt).replace(/[?.!]+$/, '').trim() || 'something new';
+			const samples = questionBanks[topic].slice(0, 3).map(([question, options, answer], index) =>
+				`${index + 1}. ${question} Answer: ${options[answer]}.`
+			);
+			return `Quiz idea: ${displayTopic} — surprising facts and quick wins.\n\nReady-to-use questions (${topic}):\n${samples.join('\n')}`;
+		}
+		function toast(message) {
+			const root = document.getElementById('toast-root');
+			root.innerHTML = `<div class="toast">${escapeHTML(message)}</div>`;
+			setTimeout(() => root.innerHTML = '', 2400);
+		}
+		document.addEventListener('click', event => {
+			const target = event.target.closest('button');
+			if (!target) {
+				if (event.target.classList.contains('modal-backdrop')) document.getElementById('modal-root').innerHTML = '';
+				return;
+			}
+			if (target.dataset.view) { event.preventDefault(); go(target.dataset.view); return; }
+			if (target.dataset.go) { go(target.dataset.go); return; }
+			if (target.dataset.topic) { go('home', target.dataset.topic); return; }
+			if (target.dataset.filter) { state.topic = target.dataset.filter; render(); return; }
+			if (target.dataset.clear !== undefined) { state.topic = 'All topics'; state.query = ''; render(); return; }
+			if (target.dataset.play) { startQuiz(target.dataset.play); return; }
+			if (target.dataset.save) { toggleSave(target.dataset.save); return; }
+			if (target.id === 'open-assistant' || target.id === 'top-assistant') { openAssistant(); return; }
+			if (target.dataset.close) { document.getElementById('modal-root').innerHTML = ''; return; }
+			if (target.dataset.answer !== undefined && state.session && !state.session.answered) {
+				const selected = state.session.questions[state.session.index].options[Number(target.dataset.answer)];
+				state.session.answered = true;
+				if (selected.correct) state.session.score++;
+				document.querySelectorAll('[data-answer]').forEach((button, index) => {
+					button.disabled = true;
+					if (state.session.questions[state.session.index].options[index].correct) button.classList.add('correct');
+					else if (index === Number(target.dataset.answer)) button.classList.add('wrong');
+				});
+				document.getElementById('answer-feedback').textContent = selected.correct ? 'That’s right. Nice one!' : 'Not quite. The correct answer is highlighted.';
+				document.getElementById('next-question').classList.remove('hidden');
+				return;
+			}
+			if (target.id === 'next-question') {
+				state.session.index++; state.session.answered = false;
+				if (state.session.index >= state.session.questions.length) finishQuiz(); else render();
+				return;
+			}
+			if (target.id === 'add-question') {
+				const editor = document.getElementById('question-editor');
+				const count = editor.querySelectorAll('.question-block').length + 1;
+				editor.insertAdjacentHTML('beforeend', `<div class="question-block"><strong>Question ${count}</strong><input name="question" placeholder="Write your question…" required><input name="answer" placeholder="Correct answer…" required></div>`);
+				return;
+			}
+			if (target.id === 'assist-generate') {
+				const input = document.getElementById('assist-topic');
+				document.getElementById('assist-result').innerHTML = `<div class="modal-response">${escapeHTML(suggestion(input.value))}</div>`;
+				return;
+			}
+			if (target.id === 'assistant-ask') {
+				const input = document.getElementById('assistant-prompt');
+				document.getElementById('assistant-response').innerHTML = `<div class="modal-response">${escapeHTML(suggestion(input.value))}</div>`;
+			}
+		});
+		document.addEventListener('input', event => {
+			if (event.target.id === 'quiz-search') {
+				state.query = event.target.value;
+				const cursor = event.target.selectionStart;
+				render();
+				const replacement = document.getElementById('quiz-search');
+				replacement.focus(); replacement.setSelectionRange(cursor, cursor);
+			}
+		});
+		document.addEventListener('submit', event => {
+			if (event.target.id !== 'quiz-form') return;
+			event.preventDefault();
+			const form = event.target;
+			const questions = [...form.querySelectorAll('.question-block')].map((block, index) => {
+				const inputs = block.querySelectorAll('input');
+				return { prompt: inputs[0].value.trim(), answer: inputs[1].value.trim(), index };
+			}).filter(question => question.prompt && question.answer);
+			const quiz = {
+				id: `custom-${Date.now()}`, title: form.elements.title.value.trim(), topic: form.elements.topic.value,
+				count: questions.length, minutes: Math.max(1, Math.ceil(questions.length * .6)), difficulty: 'Your quiz',
+				questions: questions.map(question => [question.prompt, [question.answer, 'Not sure yet', 'I need a hint', 'I’ll come back to this'], 0])
+			};
+			state.custom.unshift(quiz); persist(); toast('Your quiz is ready to play.'); go('create');
+		});
+		render();
+	</script>
+</body>
+</html>
